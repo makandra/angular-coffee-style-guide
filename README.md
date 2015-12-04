@@ -1,3 +1,5 @@
+# ========== THIS IS A DRAFT ===========
+
 # AngularJS Style Guide for CoffeeScript
 
 Adapted from this [guide](https://github.com/Plateful/plateful-mobile/wiki/AngularJS-CoffeeScript-Style-Guide) by [@JoelCox](//twitter.com/joelcoxokc), which in turn is based on [this guide](https://github.com/johnpapa/angular-styleguide) by [@john_papa](//twitter.com/john_papa).
