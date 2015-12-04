@@ -2,7 +2,7 @@
 
 Adapted from this [guide](https://github.com/Plateful/plateful-mobile/wiki/AngularJS-CoffeeScript-Style-Guide) by [@JoelCox](//twitter.com/joelcoxokc), which in turn is based on [this guide](https://github.com/johnpapa/angular-styleguide) by [@john_papa](//twitter.com/john_papa).
 
-We use Angular together with a Rails backend, so some naming conventions are chosen to be similar to Rails.
+We use Angular together with a Rails back-end, so some conventions are chosen to be similar to Rails.
 
 
 ## Table of Contents
@@ -19,7 +19,9 @@ We use Angular together with a Rails backend, so some naming conventions are cho
 
 ## Single responsibility
 
-- **Rule of 1**: Define 1 component per file.
+- **Rule of 1**
+
+  Define 1 component per file.
 
   The following example defines the `app` module and its dependencies, defines a controller, and defines a factory all in the same file.
 
@@ -61,7 +63,7 @@ We use Angular together with a Rails backend, so some naming conventions are cho
 
 ## Directory structure
 
-- **Organize by type, then namespace**:
+- **Organize by type, then namespace**
 
   ```
   app
@@ -92,7 +94,9 @@ We use Angular together with a Rails backend, so some naming conventions are cho
 
 ## Modules
 
-- **Definitions**: Use a global variable `@app` to hold your application module. Define it once. Use it for to define controllers, services and directives.
+- **Definitions**
+
+  Use a global variable `@app` to hold your application module. Define it once. Use it for to define controllers, services and directives.
 
   *Why?*: We can afford to add one global variable. It makes other definitions more readable.
 
@@ -121,14 +125,27 @@ We use Angular together with a Rails backend, so some naming conventions are cho
   ]
   ```
 
-- **IIFE**: There is no need to wrap coffeescript code into IIFEs (immediately invoked function expressions). Coffeescript does this for you.
+- **Namespaces**
 
-  *Why?*: Coffeescript already does this for you.
+  Organize controllers in namespaces where reasonable. The namespaces are reflected in the directoy structure as well as the name. Use ruby notation (`::`) to separate namespaces.
+
+  ```coffee
+  # recommended
+  @app.controller 'Page::IndexController', [->
+    # ...
+  ]
+  ```
+
+- **IIFE**
+
+  There is no need to wrap CoffeeScript code into IIFEs (immediately invoked function expressions). CoffeeScript does this for you.
+
+  *Why?*: CoffeeScript already does this for you.
 
   ```coffee
   # AVOID
   (->
-    @app.factory 'logger', [->
+    @app.service 'logger', [->
     ]
   )()
   ```
@@ -138,32 +155,35 @@ We use Angular together with a Rails backend, so some naming conventions are cho
 
 ## Manual dependency injection
 
-  - **Annotate dependencies**: Avoid using the shortcut syntax of declaring dependencies without using a minification-safe approach. Instead, use the "array method" of declaring dependencies.
+- **Annotate dependencies**
 
-    *Why?*: We don't have an automated way to annotate dependencies. Using the "array method" keeps the annotation and the actual parameters on the same line, so we are less likely to forget to keep them nin sync.
+  Avoid using the shortcut syntax of declaring dependencies without using a minification-safe approach. Instead, use the "array method" of declaring dependencies.
 
-    ```coffee
-    # AVOID
-    @app.controller 'DashboardController', (Common, Data) ->
-      # ...
-    ```
+  *Why?*: We don't have an automated way to annotate dependencies. Using the "array method" keeps the annotation and the actual parameters on the same line, so we are less likely to forget to keep them nin sync.
 
-    instead:
+  ```coffee
+  # AVOID
+  @app.controller 'DashboardController', (Common, Data) ->
+    # ...
+  ```
 
-    ```coffee
-    # recommended
-    @app.controller 'DashboardController', ['Common', 'Data', (Common, Data) ->
-      # ...
-    ]
-    ```
+  instead:
 
+  ```coffee
+  # recommended
+  @app.controller 'DashboardController', ['Common', 'Data', (Common, Data) ->
+    # ...
+  ]
+  ```
 
 **[Back to top](#table-of-contents)**
 
 
 ## Controllers
 
-- **controllerAs**: Use the [`controllerAs`](http://www.johnpapa.net/do-you-like-your-angular-controllers-with-or-without-sugar/) syntax over the "classic controller with $scope" syntax. 
+- **Use controllerAs**
+
+  Use the [`controllerAs`](http://www.johnpapa.net/do-you-like-your-angular-controllers-with-or-without-sugar/) syntax over the "classic controller with $scope" syntax.
 
   *Why?*: Controllers are constructed, "newed" up, and provide a single new instance, and the `controllerAs` syntax is closer to that of a JavaScript constructor than the `classic $scope syntax`.
 
@@ -203,13 +223,14 @@ We use Angular together with a Rails backend, so some naming conventions are cho
     $stateProvider
       .state 'customer.show',
         templateUrl: 'customer/show'
-        controller: 'CustomerController as customer'
+        controller: 'customer.ShowController as customer'
   ```
 
   ```coffee
-  # recommended, but see below for the **init** function
-  @app.controller 'CustomerController', [->
+  # recommended
+  @app.controller 'customer.ShowController', [->
     @name = {}
+
     @sendMessage = =>
 
     return
@@ -219,80 +240,79 @@ We use Angular together with a Rails backend, so some naming conventions are cho
   Note that you need an explicit `return`, see below.
 
 
+- **Organziation of controller function**
 
-- **Bindable Members Up Top**:
+  In the controller, put things in the following order:
 
-  Place bindable members at the top of the controller in an `init` function, alphabetized, and not spread through the controller code.
+  - Bindable attributes (exposed to the view)
+  - Private variables
+  - Initialization logic (see below)
+  - Bindable methods (exposed to the view)
+  - Private functions
 
-  *Why?*: Placing bindable members at the top makes it easy to read and helps you instantly identify which members of the controller can be bound and used in the View.
-
-  *Why?*: Setting anonymous functions inline can be easy, but when those functions are more than 1 line of code they can reduce the readability.
-
-  *Why?*: In coffeescript you cannot use hoisted function declarations, and hence you have to use something like the `init` function.
+  *Why?*: Placing bindable members near the top makes it obvious what is used in the view.
 
   ```coffee
-  # AVOID
+  # recommended
   @app.controller 'SessionsController', [->
-    @signIn = ()=>
-      # ...
 
-    @signOut = ()=>
-      # ...
+    alreadySignedIn = false
 
     @currentUser = null
-  ]
-  ```
-
-  ```coffee
-  # recommended
-  @app.controller 'SessionsController', [->
-
-    init = =>
-      @currentUser = null
-      @signIn = signIn
-      @signOut = signOut
 
 
-    signIn = =>
+    @signIn = =>
+      unless alreadySignedIn
+        request('/sign_in').then (response) =>
+          @currentUser = user
+          alreadySignedIn = true
+
+    @signOut = =>
       # ...
 
-    signOut = =>
-      # ...
-
-
-    init()
-    return
-  ]
-  ```
-
-- **Private functions**:
-
-  Keep private functions at the bottom and do not expose them:
-
-  ```coffee
-  # recommended
-  @app.controller 'SessionsController', [->
-
-    init = =>
-      @signIn = signIn
-
-
-    signIn = =>
-      request('/sign_in')
-
-
-    # private
 
     request = =>
       # ...
 
 
+    return
+  ]
+  ```
+
+
+- **Initialization logic**
+
+  Logic that needs to run when instantiating the controller (like loading some
+  data) goes into an `init` function, placed between the public attributes and the public methods. Complex logic should go into a private function (or a service).
+
+  The `init` function is called before the bottom `return`.
+
+  *Why?*: Initialization happens first and so should be at the top of the controller. It needs to be wrapped in a function and called at the bottom so that everything else is already defined.
+
+  ```coffee
+  # recommended
+  @app.controller 'UserShowController', ['$routeParams', 'User', ($routeParams, User) ->
+
+    @user = null
+
+
+    init = =>
+      User.find($routeParams.userId).then (user) =>
+        @user = user
+
+
+    @destroy = =>
+      @user.destroy()
+      #...
+
+
     init()
     return
   ]
   ```
 
-- **Use services**:
+
+- **Use services**
 
   Defer logic in a controller by delegating to services and factories.
 
@@ -306,19 +326,15 @@ We use Angular together with a Rails backend, so some naming conventions are cho
   # AVOID
   @app.controller 'Order', ['$http', '$q', ($http, $q) ->
 
-    init = =>
-      @checkCredit = checkCredit
-      @total = 0
+    @total = 0
 
-
-    checkCredit = =>
+    @checkCredit = =>
       orderTotal = @total
       $http.get('api/creditcheck').then (data)=>
         remaining = data.remaining
         return $q.when(!!(remaining > orderTotal))
 
 
-    init()
     return
   ]
   ```
@@ -327,30 +343,89 @@ We use Angular together with a Rails backend, so some naming conventions are cho
   # recommended
   @app.controller 'OrderController', ['CreditService', (CreditService) ->
 
-    init = =>
-      @checkCredit = checkCredit
-      @total = 0
+    @total = 0
 
 
-    checkCredit = =>
+    @checkCredit = =>
       CreditService.check()
+
+
+    return
+  ]
+  ```
+
+- **No watches in controllers**
+
+  Try to avoid all watches in controllers. Write code instead. If you have to
+react to user input, use `ngChange` or similar.
+
+  *Why?*: Code is easier to reason about, if there are no (maybe unexpected) watches.
+
+  ```coffee
+  # AVOID
+  @app.controller 'UserInfoController', ['$scope', 'User', ($scope, User) ->
+
+    @user = null
+    @userId = null
+
+
+    init = =>
+      $scope.$watch =>
+        @userId
+      , (userId) =>
+        @user = User.find(userId)
 
 
     init()
     return
   ]
   ```
+  ```html
+  <!-- AVOID -->
+  <select ng-model='userInfo.userId' ng-options='...'></select>
+  <div class="user-info">
+    Name: {{ userInfo.user.name }}
+  </div>
+  ```
+
+  instead:
+
+  ```coffee
+  # recommended
+  @app.controller 'UserInfoController', ['$scope', 'User', ($scope, User) ->
+
+    @user = null
+    @userId = null
+
+
+    @userIdChanged = =>
+      @user = User.find(@userId)
+
+
+    return
+  ]
+  ```
+  ```html
+  <!-- recommended -->
+  <select ng-model='userInfo.userId' ng-change='userInfo.userIdChanged()' ng-options='...'></select>
+  <div class="user-info">
+    Name: {{ userInfo.user.name }}
+  </div>
+  ```
+
 
 **[Back to top](#table-of-contents)**
 
 
 ## Services
 
-- **Generally, use `factory` where possible**. Avoid using `service` or `provider`.
+- **Single Responsibility**
 
-- **Single Responsibility**: Factories should have a [single responsibility](http://en.wikipedia.org/wiki/Single_responsibility_principle), that is encapsulated by its context. Once a factory begins to exceed that singular purpose, a new factory should be created.
+  Services should have a [single responsibility](http://en.wikipedia.org/wiki/Single_responsibility_principle), that is encapsulated by its context. Once a factory begins to exceed that singular purpose, a new factory should be created.
 
-- **Instances**: If you need a service that can be instantiated, return a coffeescript class:
+- **Instances**
+
+  If you need a service that can be instantiated, use `factory` and return a CoffeeScript class:
 
   ```coffee
   # recommended
@@ -362,7 +437,9 @@ We use Angular together with a Rails backend, so some naming conventions are cho
   ]
   ```
 
-- **Singletons: public members on top**: If you need a singleton, write the service like a controller. Angular will instantiate it only once. Place public members on top.
+- **Singletons: public members on top**
+
+  If you need a singleton, use `service` and write the service like a controller. Angular will instantiate it only once. Place public members on top.
 
   ```coffee
   # AVOID
@@ -382,22 +459,18 @@ We use Angular together with a Rails backend, so some naming conventions are cho
 
   ```coffee
   # recommended
-  @app.factory 'DataService', [->
+  @app.service 'DataService', [->
 
-    init = =>
-      @save = save
-      @someValue = ''
-      @validate = validate
+    @someValue = ''
 
 
-    save = =>
+    @save = =>
       # ...
 
-    validate = =>
+    @validate = =>
       # ...
 
 
-    init()
     return
   ]
   ```
@@ -405,47 +478,93 @@ We use Angular together with a Rails backend, so some naming conventions are cho
 **[Back to top](#table-of-contents)**
 
 ## Directives
-- **Limit 1 Per File**:
+- **Limit 1 Per File**
 
   Create one directive per file. Name the file for the directive.
 
 
-- **Limit DOM Manipulation**:
+- **Limit DOM Manipulation**
 
-  When manipulating the DOM directly, use a directive. If alternative ways can be used such as using CSS to set styles or the [animation services](https://docs.angularjs.org/api/ngAnimate), Angular templating, [`ngShow`](https://docs.angularjs.org/api/ng/directive/ngShow) or [`ngHide`](https://docs.angularjs.org/api/ng/directive/ngHide), then use those instead. For example, if the directive simply hide and shows, use ngHide/ngShow, but if the directive does more, combining hide and show inside a directive may improve performance as it reduces watchers.
+  When manipulating the DOM directly, use a directive. If alternative ways can
+  be used such as using CSS to set styles or the [animation
+  services](https://docs.angularjs.org/api/ngAnimate), Angular templating,
+  [`ngShow`](https://docs.angularjs.org/api/ng/directive/ngShow) or
+  [`ngHide`](https://docs.angularjs.org/api/ng/directive/ngHide), then use those
+  instead. For example, if the directive simply hide and shows, use
+  ngHide/ngShow, but if the directive does more, combining hide and show inside a
+  directive may improve performance as it reduces watchers.
 
-    *Why?*: DOM manipulation can be difficult to test, debug, and there are often better ways (e.g. CSS, animations, templating)
+  *Why?*: DOM manipulation can be difficult to test, debug, and there are often
+  better ways (e.g. CSS, animations, templating)
 
 
-- **Restrict to either Elements or Attributes**:
+- **Restrict to either Elements or Attributes**
 
   When creating a directive that makes sense as a standalone element, use `restrict: 'E'`.
 
   When creating a directive that enhances an existing element, use `restrict: 'A'`.
 
 
-- **Use controller, controllerAs and bindToController**:
+- **Avoid using controllerAs and bindToController**
 
-  All the interaction between the directive's template and all application should use a controller. The `controllerAs` and `bindToController` syntax makes this consistent with regular controllers.
+  Use scopes instead.
 
-  Always use `controllerAs: 'vm'` (short for "view model").
+  *Why?*: This is unfortunate, since it makes directives look different to services and controllers.
+  However, the current `controllerAs` / `bindToController` syntax is too cumbersome when requiring
+  other directives (see the `ngModel` examples below).
 
-  Bindings are automatically bound to the controller instance when using ".
 
-  Sometimes the controller has to manipulate the DOM in response to some user interaction. This is okay. Simply inject `$element` into the controller.
+- **Complex link functions**
 
-  If you need to set up events, do initial DOM maniuplation, or set up watches do this inside the link function. If you have a controller, this is injected as the 4th parameter into your link function.
+  Complex link functions are written similar to a controller, except you need to write `scope.` instead of `@`.
 
-  *Note*: Doing this only works well with an isolate scope. You should always use isolate scopes, unless there is a very compelling reason to do otherwise.
+  Order everything as follows:
+  - Scope attributes
+  - Private variables
+  - Initialization logic as an `init` function. This includes setting up watches, etc.
+  - Scope methods
+  - Private functions
 
-  TODO
+  *Why?*: The `link` function should look similar to a controller.
 
   ```coffee
+  # recommended
+  @app.directive 'acmeSomeDirective', [->
+    # ...
 
+    link: (scope, element, attributes) ->
+
+      somePrivateState =
+        key: value
+
+
+      scope.isVisible = false
+
+
+      init = ->
+        element.find('foobar').hide()
+
+        scope.$watch 'something', somethingChanged
+
+        scope.$on '$destroy', destroy
+
+
+      scope.doSomething = ->
+        # ...
+
+
+      somethingChanged = ->
+        # ...
+
+      destroy = ->
+
+
+      init()
+  ]
   ```
 
 
-- **Prefix directives**:
+- **Prefix directives**
 
   Use a short, common prefix for directives, so you can easily distinguish your own directives from third party directives.
 
@@ -456,7 +575,7 @@ We use Angular together with a Rails backend, so some naming conventions are cho
   ]
   ```
 
-- **Inline templates**:
+- **Inline templates**
 
   Only use inline templates for templates shorter than about 10 lines.
 
@@ -497,7 +616,7 @@ We use Angular together with a Rails backend, so some naming conventions are cho
   ]
   ```
 
-- **When it makes sense, try to keep directives generic**:
+- **When it makes sense, try to keep directives generic**
 
   *Why?* It allows you to share directives between projects.
 
@@ -539,6 +658,7 @@ We use Angular together with a Rails backend, so some naming conventions are cho
     scope:
       content: '='
       whenEmpty: '@'
+
     template: """
               <div ng-class="{ 'has-no-content': content.length == 0}">
                 <div ng-if="content.length == 0">
@@ -563,7 +683,7 @@ We use Angular together with a Rails backend, so some naming conventions are cho
 
 ## Promises
 
-- **Always use promises instead of callbacks**:
+- **Always use promises instead of callbacks**
 
   *Why?*: This is the accepted way of doing callbacks. Promises can be chained.
 
@@ -612,25 +732,91 @@ We use Angular together with a Rails backend, so some naming conventions are cho
   ```
 
 
-- **Prefer the closure way of using $q, when possible**:
+- **Prefer the closure form of $q when possible**
 
   *Why?*: Easier to understand.
 
   ```coffee
   # AVOID
+  ->
+    deferred = $q.defer()
+    $timeout ->
+      success = doSomething()
+      if success
+        deferred.resolve()
+      else
+        deferred.reject()
+
+    deferred.promise
+  ```
+
+  instead:
+
+  ```coffee
+  # recommended
+  ->
+    $q (resolve, reject) ->
+      $timeout ->
+        success = doSomething()
+        if success
+          resolve()
+        else
+          reject()
   ```
 
 
 ## Custom form elements
 
-- **Always depend on ng-model and use its API**
+- **Always depend on ngModel and use its API**
 
-  TODO
+  If you write custom form elements, always extend `ngModel` and use Angular's default API.
+
+  *Why?*: `NgModel` already solves a lot of issues you might not even be aware of.
+
+  *Why?*: It makes other form features (like `ngChange`, validations, etc…) work out of the box.
+
+  ```coffee
+  # recommended
+  @app.directive 'acmeCheckboxList', [->
+    restrict: 'E'
+    require: 'ngModel'
+
+    template: """
+              <div ng-repeat="option in options">
+                <label class="checkbox-inline">
+                  <input ng-change="checkboxChanged()" ng-model="checkboxes[option.id]" type="checkbox">
+                  {{ option.label }}
+                </label>
+              </div>
+              """
+
+    link: (scope, element, attributes, ngModelController) ->
+
+      scope.checkboxes = {}
+
+
+      init = ->
+        ngModelController.render = render
+
+
+      scope.changed = ->
+        ids = (id for id, value of scope.checkboxes when value)
+        ngModelController.$setViewValue(ids)
+
+
+      render = ->
+        viewValue = ngModelController.$viewValue
+        if viewValue?
+          scope.checkboxes = {}
+          for id in viewValue
+            scope.checkboxes[id] = true
+  ]
+  ```
 
 
 ## Performance
 
-- **One-time bindings**:
+- **One-time bindings**
 
   Use the one-time binding syntax `{{ ::value }}` when possible.
 
@@ -645,3 +831,11 @@ We use Angular together with a Rails backend, so some naming conventions are cho
   <!-- recommended -->
   <h1>{{ ::page.title }}</h1>
   ```
+
+- **NgIf vs ngShow / ngHide**
+
+  Make a concious choice whether to use `ngIf` oder `ngShow`.
+
+  `NgShow` requires little work when the condition changes, but needs to constantly update invisible content.
+
+  `NgIf` has to update a lot of the DOM if the condition changes, but saves time rendering keeping invisible content up to date.
