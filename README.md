@@ -114,7 +114,7 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
   ```coffee
   # recommended
   # app.coffee
-  angular.module 'app', [
+  @app = angular.module 'app', [
     'ngAnimate'
     'ngRoute'
   ]
