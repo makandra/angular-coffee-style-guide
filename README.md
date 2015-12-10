@@ -246,8 +246,8 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
   In the controller, put things in the following order:
 
-  - Bindable attributes (exposed to the view)
   - Private variables
+  - Bindable attributes (exposed to the view)
   - Initialization logic (see below)
   - Bindable methods (exposed to the view)
   - Private functions
@@ -521,8 +521,8 @@ react to user input, use `ngChange` or similar.
   Complex link functions are written similar to a controller, except you need to write `scope.` instead of `@`.
 
   Order everything as follows:
-  - Scope attributes
   - Private variables
+  - Scope attributes
   - Initialization logic as an `init` function. This includes setting up watches, etc.
   - Scope methods
   - Private functions
