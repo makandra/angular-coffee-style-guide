@@ -34,7 +34,7 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
   @app.controller 'SomeController', [->
   ]
 
-  @app.factory 'SomeFactory', SomeFactory [->
+  @app.factory 'SomeFactory', [->
   ]
   ```
 
@@ -56,7 +56,7 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
   ```coffee
   # recommended
   # some_factory.coffee
-  @app.factory 'SomeFactory', SomeFactory [->
+  @app.factory 'SomeFactory', [->
   ]
   ```
 
@@ -98,7 +98,7 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
 - **Definitions**
 
-  Use a global variable `@app` to hold your application module. Define it once. Use it for to define controllers, services and directives.
+  Use a global variable `@app` to hold your application module. Define it once. Use it to define controllers, services and directives.
 
   *Why?*: We can afford to add one global variable. It makes other definitions more readable.
 
@@ -129,7 +129,7 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
 - **Namespaces**
 
-  Organize controllers in namespaces where reasonable. The namespaces are reflected in the directoy structure as well as the name. Use ruby notation (`::`) to separate namespaces.
+  Organize controllers in namespaces where reasonable. The namespaces are reflected in the directoy structure as well as the name. Use Ruby notation (`::`) to separate namespaces.
 
   ```coffee
   # recommended
@@ -159,9 +159,12 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
 - **Annotate dependencies**
 
-  Avoid using the shortcut syntax of declaring dependencies without using a minification-safe approach. Instead, use the "array method" of declaring dependencies.
+  Declare injected dependencies using the array syntax. Do not use the shorthand syntax.
+  Keep annotation and actual parameters on the same line.
 
-  *Why?*: We don't have an automated way to annotate dependencies. Using the "array method" keeps the annotation and the actual parameters on the same line, so we are less likely to forget to keep them nin sync.
+  *Why?*: Minification renames method arguments which breaks injection. As a workaround for this, Angular supports listing injected dependencies as strings (which are never minified). We do not have an automated way to annotate dependencies before minification, so you need to define them yourself.
+
+  *Why?*: Keeping annotation and actual parameters on the same line reduces the risk of accidentially updating only one of them.
 
   ```coffee
   # AVOID
@@ -187,20 +190,13 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
   Use the [`controllerAs`](http://www.johnpapa.net/do-you-like-your-angular-controllers-with-or-without-sugar/) syntax over the "classic controller with $scope" syntax.
 
-  *Why?*: Controllers are constructed, "newed" up, and provide a single new instance, and the `controllerAs` syntax is closer to that of a JavaScript constructor than the `classic $scope syntax`.
+  *Why?*: Controllers are constructed, "newed" up, and provide a single new instance, and the `controllerAs` syntax is closer to that of a JavaScript constructor than the "classic `$scope` syntax".
 
   *Why?*: It promotes the use of binding to a "dotted" object in the View (e.g. `customer.name` instead of `name`), which is more contextual, easier to read, and avoids any reference issues that may occur without "dotting".
 
   *Why?*: Helps avoid using `$parent` calls in Views with nested controllers.
 
   So, instead of:
-
-  ```html
-  <!-- AVOID -->
-  <div ng-controller="Customer">
-    {{ name }}
-  </div>
-  ```
 
   ```coffee
   # AVOID
@@ -210,7 +206,25 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
   ]
   ```
 
+  ```html
+  <!-- AVOID -->
+  <div ng-controller="CustomerController">
+    {{ name }}
+  </div>
+  ```
+
   do this:
+
+  ```coffee
+  # recommended
+  @app.controller 'CustomerController', [->
+    @name = {}
+
+    @sendMessage = =>
+
+    return
+  ]
+  ```
 
   ```html
   <!-- recommended -->
@@ -225,18 +239,7 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
     $stateProvider
       .state 'customer.show',
         templateUrl: 'customer/show'
-        controller: 'customer.ShowController as customer'
-  ```
-
-  ```coffee
-  # recommended
-  @app.controller 'customer.ShowController', [->
-    @name = {}
-
-    @sendMessage = =>
-
-    return
-  ]
+        controller: 'CustomerController as customer'
   ```
 
   Note that you need an explicit `return`, see below.
@@ -293,7 +296,7 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
   ```coffee
   # recommended
-  @app.controller 'UserShowController', ['$routeParams', 'User', ($routeParams, User) ->
+  @app.controller 'UserController', ['$routeParams', 'User', ($routeParams, User) ->
 
     @user = null
 
@@ -452,10 +455,10 @@ react to user input, use `ngChange` or similar.
 
     return
       save: ()->
-       # . #
+        # . #
 
       validate: ()->
-       # . #
+        # . #
   ]
   ```
 
@@ -463,7 +466,7 @@ react to user input, use `ngChange` or similar.
   # recommended
   @app.service 'DataService', [->
 
-    @someValue = ''
+    someValue = ''
 
 
     @save = =>
@@ -506,6 +509,8 @@ react to user input, use `ngChange` or similar.
 
   When creating a directive that enhances an existing element, use `restrict: 'A'`.
 
+  Never use `restrict: 'C'`.
+  *Why?*: Classes are for styling, not for logic.
 
 - **Avoid using controllerAs and bindToController**
 
@@ -673,7 +678,7 @@ react to user input, use `ngChange` or similar.
   ```
   ```html
     <!-- recommended -->
-    <acme-no-content content="orders" whenEmpty="No orders found.">
+    <acme-no-content content="orders" when-empty="No orders found.">
       <table>
         ...
       </table>
