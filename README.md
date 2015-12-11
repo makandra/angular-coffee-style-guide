@@ -778,7 +778,7 @@ react to user input, use `ngChange` or similar.
 
   If you write custom form elements, always extend `ngModel` and use Angular's default API.
 
-  *Why?*: `NgModel` already solves a lot of issues you might not even be aware of.
+  *Why?*: `ngModel` already solves a lot of issues you might not even be aware of.
 
   *Why?*: It makes other form features (like `ngChange`, validations, etc…) work out of the box.
 
@@ -839,10 +839,10 @@ react to user input, use `ngChange` or similar.
   <h1>{{ ::page.title }}</h1>
   ```
 
-- **NgIf vs ngShow / ngHide**
+- **ngIf vs ngShow / ngHide**
 
   Make a concious choice whether to use `ngIf` oder `ngShow`.
 
-  `NgShow` requires little work when the condition changes, but needs to constantly update invisible content.
+  `ngShow` requires little work when the condition changes, but needs to constantly update invisible content.
 
-  `NgIf` has to update a lot of the DOM if the condition changes, but saves time rendering keeping invisible content up to date.
+  `ngIf` has to update a lot of the DOM if the condition changes, but saves time rendering by not keeping invisible content up to date.
