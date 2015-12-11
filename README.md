@@ -265,7 +265,6 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
     @currentUser = null
 
-
     @signIn = =>
       unless alreadySignedIn
         request('/sign_in').then (response) =>
@@ -275,10 +274,8 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
     @signOut = =>
       # ...
 
-
     request = =>
       # ...
-
 
     return
   ]
@@ -300,16 +297,13 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
     @user = null
 
-
     init = =>
       User.find($routeParams.userId).then (user) =>
         @user = user
 
-
     @destroy = =>
       @user.destroy()
       #...
-
 
     init()
     return
@@ -339,7 +333,6 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
         remaining = data.remaining
         return $q.when(!!(remaining > orderTotal))
 
-
     return
   ]
   ```
@@ -350,10 +343,8 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
     @total = 0
 
-
     @checkCredit = =>
       CreditService.check()
-
 
     return
   ]
@@ -373,13 +364,11 @@ react to user input, use `ngChange` or similar.
     @user = null
     @userId = null
 
-
     init = =>
       $scope.$watch =>
         @userId
       , (userId) =>
         @user = User.find(userId)
-
 
     init()
     return
@@ -402,10 +391,8 @@ react to user input, use `ngChange` or similar.
     @user = null
     @userId = null
 
-
     @userIdChanged = =>
       @user = User.find(@userId)
-
 
     return
   ]
@@ -452,7 +439,6 @@ react to user input, use `ngChange` or similar.
 
     someValue = ''
 
-
     return
       save: ()->
         # . #
@@ -468,13 +454,11 @@ react to user input, use `ngChange` or similar.
 
     someValue = ''
 
-
     @save = =>
       # ...
 
     @validate = =>
       # ...
-
 
     return
   ]
@@ -544,9 +528,7 @@ react to user input, use `ngChange` or similar.
       somePrivateState =
         key: value
 
-
       scope.isVisible = false
-
 
       init = ->
         element.find('foobar').hide()
@@ -555,16 +537,13 @@ react to user input, use `ngChange` or similar.
 
         scope.$on '$destroy', destroy
 
-
       scope.doSomething = ->
         # ...
-
 
       somethingChanged = ->
         # ...
 
       destroy = ->
-
 
       init()
   ]
@@ -801,15 +780,12 @@ react to user input, use `ngChange` or similar.
 
       scope.checkboxes = {}
 
-
       init = ->
         ngModelController.render = render
-
 
       scope.changed = ->
         ids = (id for id, value of scope.checkboxes when value)
         ngModelController.$setViewValue(ids)
-
 
       render = ->
         viewValue = ngModelController.$viewValue
