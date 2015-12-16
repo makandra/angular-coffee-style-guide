@@ -242,7 +242,7 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
         controller: 'CustomerController as customer'
   ```
 
-  Note that you need an explicit `return`, see below.
+  **Note that you need an explicit `return` at the end.**
 
 
 - **Organziation of controller function**
@@ -261,10 +261,15 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
   # recommended
   @app.controller 'SessionsController', [->
 
+    # private variables
+
     alreadySignedIn = false
+
+    # bindable attributes
 
     @currentUser = null
 
+    # bindable methods
 
     @signIn = =>
       unless alreadySignedIn
@@ -275,10 +280,10 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
     @signOut = =>
       # ...
 
+    # private functions
 
     request = =>
       # ...
-
 
     return
   ]
@@ -298,18 +303,21 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
   # recommended
   @app.controller 'UserController', ['$routeParams', 'User', ($routeParams, User) ->
 
+    # bindable attributes
+
     @user = null
 
+    # initialization
 
     init = =>
       User.find($routeParams.userId).then (user) =>
         @user = user
 
+    # bindable methods
 
     @destroy = =>
       @user.destroy()
       #...
-
 
     init()
     return
@@ -339,7 +347,6 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
         remaining = data.remaining
         return $q.when(!!(remaining > orderTotal))
 
-
     return
   ]
   ```
@@ -350,10 +357,8 @@ We use Angular together with a Rails back-end, so some conventions are chosen to
 
     @total = 0
 
-
     @checkCredit = =>
       CreditService.check()
-
 
     return
   ]
@@ -373,13 +378,11 @@ react to user input, use `ngChange` or similar.
     @user = null
     @userId = null
 
-
     init = =>
       $scope.$watch =>
         @userId
       , (userId) =>
         @user = User.find(userId)
-
 
     init()
     return
@@ -402,10 +405,8 @@ react to user input, use `ngChange` or similar.
     @user = null
     @userId = null
 
-
     @userIdChanged = =>
       @user = User.find(@userId)
-
 
     return
   ]
@@ -417,7 +418,6 @@ react to user input, use `ngChange` or similar.
     Name: {{ userInfo.user.name }}
   </div>
   ```
-
 
 **[Back to top](#table-of-contents)**
 
@@ -452,7 +452,6 @@ react to user input, use `ngChange` or similar.
 
     someValue = ''
 
-
     return
       save: ()->
         # . #
@@ -466,8 +465,11 @@ react to user input, use `ngChange` or similar.
   # recommended
   @app.service 'DataService', [->
 
+    # private variables
+
     someValue = ''
 
+    # public methods
 
     @save = =>
       # ...
@@ -475,10 +477,11 @@ react to user input, use `ngChange` or similar.
     @validate = =>
       # ...
 
-
     return
   ]
   ```
+
+  **Note, again, the explicit `return` at the end.**
 
 **[Back to top](#table-of-contents)**
 
@@ -500,7 +503,7 @@ react to user input, use `ngChange` or similar.
   directive may improve performance as it reduces watchers.
 
   *Why?*: DOM manipulation can be difficult to test, debug, and there are often
-  better ways (e.g. CSS, animations, templating)
+  better ways (e.g. CSS, animations, templating).
 
 
 - **Restrict to either Elements or Attributes**
@@ -541,12 +544,16 @@ react to user input, use `ngChange` or similar.
 
     link: (scope, element, attributes) ->
 
+      # private variables
+
       somePrivateState =
         key: value
 
+      # scope attributes
 
       scope.isVisible = false
 
+      # initialization
 
       init = ->
         element.find('foobar').hide()
@@ -555,6 +562,7 @@ react to user input, use `ngChange` or similar.
 
         scope.$on '$destroy', destroy
 
+      # scope methods
 
       scope.doSomething = ->
         # ...
@@ -563,8 +571,9 @@ react to user input, use `ngChange` or similar.
       somethingChanged = ->
         # ...
 
-      destroy = ->
+      # private methods
 
+      destroy = ->
 
       init()
   ]
@@ -801,15 +810,12 @@ react to user input, use `ngChange` or similar.
 
       scope.checkboxes = {}
 
-
       init = ->
         ngModelController.render = render
-
 
       scope.changed = ->
         ids = (id for id, value of scope.checkboxes when value)
         ngModelController.$setViewValue(ids)
-
 
       render = ->
         viewValue = ngModelController.$viewValue
@@ -817,6 +823,8 @@ react to user input, use `ngChange` or similar.
           scope.checkboxes = {}
           for id in viewValue
             scope.checkboxes[id] = true
+
+      init()
   ]
   ```
 
